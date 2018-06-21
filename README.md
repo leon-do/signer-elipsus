@@ -1,1 +1,1 @@
-# rydn-signer
+https://rydn-wallet.github.io/rydn-signer/
