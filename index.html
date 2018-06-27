@@ -17,19 +17,25 @@
         Private Key:<input id="pKey" value="0x0123456789012345678901234567890123456789012345678901234567890123">
         contractAddress:<input id="contractAddress" value="0x0dcd2f752394c41875e259e00bb44fd505297caf">
         wei:<input id="wei" value="1000000000000000000">
-        <button onclick="send()">Send</button>
-        <div id="send"></div>
+        <button onclick="sign()">sign</button>
+        <div id="sign"></div>
             
         <div id="signedMsg"></div>
+
+        <button onclick="send()" id="sendBtn" style="visibility:hidden;">send</button>
 
         
     </pre>
 </body>
 
-<script src="https://cdn.ethers.io/scripts/ethers-v3.min.js"></script>
+
+<!-- // https://github.com/axios/axios -->
+<script src="./js/axios.max.js"></script>
+<!-- https://github.com/ethers-io/ethers.js/#installing -->
+<script src="./js/ethers.max.js"></script>
 <script>
 
-    function send() {
+    function sign() {
         const wei = document.getElementById('wei').value
         const contractAddress = document.getElementById('contractAddress').value
         const privateKey = document.getElementById('pKey').value
@@ -46,7 +52,20 @@
         const v = 27 + recoveryParam
 
         document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei }, null, 4)
+        document.getElementById('sendBtn').style.visibility = "visible"
+    }
 
+    async function send() {
+        // get object from dom
+        const signedMsg = JSON.parse(document.getElementById('signedMsg').textContent)
+        // POST signed msg
+        const response = await axios({
+            method: 'POST',
+            url: 'http://localhost:8000/send',
+            data: signedMsg
+        })
+
+        console.log(response)
     }
 
 </script>
