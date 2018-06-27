@@ -24,7 +24,7 @@
 
         <button onclick="send()" id="sendBtn" style="visibility:hidden;">send</button>
 
-        
+        <div id="responseMsg"></div>
     </pre>
 </body>
 
@@ -51,21 +51,25 @@
         const { r, s, recoveryParam } = signingKey.signDigest(h);
         const v = 27 + recoveryParam
 
+        // display shit
         document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei }, null, 4)
         document.getElementById('sendBtn').style.visibility = "visible"
     }
 
     async function send() {
-        // get object from dom
+        // get msg from DOM
         const signedMsg = JSON.parse(document.getElementById('signedMsg').textContent)
         // POST signed msg
-        const response = await axios({
+        await axios({
             method: 'POST',
             url: 'http://localhost:8000/send',
             data: signedMsg
+        }).then(response => {
+            document.getElementById('responseMsg').innerHTML = JSON.stringify(response.data, null, 4)
+        }).catch(e => {
+            document.getElementById('responseMsg').innerHTML = JSON.stringify(e.response.data, null, 4)
         })
 
-        console.log(response)
     }
 
 </script>
