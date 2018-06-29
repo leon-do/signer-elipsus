@@ -20,6 +20,7 @@
         <button onclick="signMsg()">sign</button>
         <div id="sign"></div>
             
+        <div id="lastTransaction"></div>
         <div id="signedMsg"></div>
 
         <button onclick="sendMsg()" id="sendBtn" style="visibility:hidden;">send</button>
@@ -37,26 +38,43 @@
 <script src="./js/ethers.max.js"></script>
 <script>
 
-    function signMsg() {
+    async function signMsg() {
+        // collect data from user
         const wei = document.getElementById('wei').value
         const contractAddress = document.getElementById('contractAddress').value
         const privateKey = document.getElementById('pKey').value
 
+        // prep signing key
         const signingKey = new ethers.SigningKey(privateKey);
-        const address = signingKey.address
-        console.log(address)
+        const fromAddress = signingKey.address
+
+        // get last transaction
+        const lastTransaction = await getLastTransaction({
+            contractAddress: contractAddress,
+            fromAddress: fromAddress
+        })
+
+        // add wei to previous transaction
+        const totalWei = new ethers.utils.BigNumber(wei).add(new ethers.utils.BigNumber(lastTransaction.wei)).toString()
 
         // https://docs.ethers.io/ethers.js/html/api-utils.html?highlight=keccak256
-        const h = ethers.utils.solidityKeccak256(['address', 'uint'], [contractAddress, ethers.utils.bigNumberify(wei)]);
+        const h = ethers.utils.solidityKeccak256(['address', 'uint'], [contractAddress, ethers.utils.bigNumberify(totalWei)]);
 
         // sign and split message: https://github.com/ethers-io/ethers.js/issues/85
         const { r, s, recoveryParam } = signingKey.signDigest(h);
         const v = 27 + recoveryParam
 
         // display shit
-        document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei }, null, 4)
+        document.getElementById('lastTransaction').innerHTML = `wei: <br> last transaction: ${lastTransaction.wei} <br> sending: ${wei} <br> total wei: ${totalWei}`
+        document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei: totalWei }, null, 4)
         document.getElementById('sendBtn').style.visibility = "visible"
         document.getElementById('closeBtn').style.visibility = "visible"
+    }
+
+    async function getLastTransaction(_body) {
+        const response = await axios.get(`http://localhost:8000/last?fromAddress=${_body.fromAddress}&contractAddress=${_body.contractAddress}`)
+        const lastTransaction = response.data.message
+        return lastTransaction
     }
 
     async function sendMsg() {
