@@ -16,6 +16,7 @@
 
         Private Key:<input id="pKey" value="0x0123456789012345678901234567890123456789012345678901234567890123">
         contractAddress:<input id="contractAddress" value="0x485A99B6504A535C9a69db6cEaC5371d828e3C88">
+        toAddress:<input id="toAddress" value="0x5D723FEa70C04a97458426E35F4568C821b98d1A">
         wei:<input id="wei" value="1">
         <button onclick="signMsg()">sign</button>
         <div id="sign"></div>
@@ -43,6 +44,7 @@
         const wei = document.getElementById('wei').value
         const contractAddress = document.getElementById('contractAddress').value
         const privateKey = document.getElementById('pKey').value
+        const toAddress = document.getElementById('toAddress').value
 
         // prep signing key
         const signingKey = new ethers.SigningKey(privateKey);
@@ -66,14 +68,14 @@
 
         // display shit
         document.getElementById('lastTransaction').innerHTML = `wei: <br> last transaction: ${lastTransaction.wei} <br> sending: ${wei} <br> total wei: ${totalWei}`
-        document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei: totalWei }, null, 4)
+        document.getElementById('signedMsg').innerHTML = JSON.stringify({ h, v, r, s, contractAddress, wei: totalWei, toAddress }, null, 4)
         document.getElementById('sendBtn').style.visibility = "visible"
         document.getElementById('closeBtn').style.visibility = "visible"
     }
 
     async function getLastTransaction(_body) {
         try {
-            const response = await axios.get(`http://localhost:8000/last?fromAddress=${_body.fromAddress}&contractAddress=${_body.contractAddress}`)
+            const response = await axios.get(`http://localhost:8000/last?address=${_body.fromAddress}`)
             const lastTransaction = response.data.message
             return lastTransaction
         } catch (e) {
