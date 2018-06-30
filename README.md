@@ -1,1 +1,1 @@
-https://rydn-wallet.github.io/signer/
+https://elipsus.github.io/signer-elipsus/
