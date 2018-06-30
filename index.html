@@ -72,9 +72,13 @@
     }
 
     async function getLastTransaction(_body) {
-        const response = await axios.get(`http://localhost:8000/last?fromAddress=${_body.fromAddress}&contractAddress=${_body.contractAddress}`)
-        const lastTransaction = response.data.message
-        return lastTransaction
+        try {
+            const response = await axios.get(`http://localhost:8000/last?fromAddress=${_body.fromAddress}&contractAddress=${_body.contractAddress}`)
+            const lastTransaction = response.data.message
+            return lastTransaction
+        } catch (e) {
+            document.getElementById('responseMsg').innerHTML = JSON.stringify(e.response.data, null, 4)
+        }
     }
 
     async function sendMsg() {
